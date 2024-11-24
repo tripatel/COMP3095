@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+
+  order-service:
+    image: postgres
+    ports:
+      - "5433:5432"
+
+    container_name: local-postgres-single-order
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./data/order:/var/lib/postgresql/data
+      - ./init/order/init.sql:/docker-entrypoint-initdb.d/init.sql
+  inventory-service:
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - "5435:5432" #change the port when we want to create a new postgres file for other services
+
+    container_name: local-postgres-inventory
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=inventory-service
+    volumes:
+      - ./data/inventory:/var/lib/postgresql/data
+      - ./init/inventory/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "8888:80"
+
+    container_name: local-pgadmin-single
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@domain.ca
+      - PGADMIN_DEFAULT_PASSWORD=password
